@@ -17,26 +17,34 @@ export default async function handler(req, res) {
   }
 
   try {
-    const pathParts = req.query.path;
-
-    const path = Array.isArray(pathParts)
-      ? pathParts.join("/")
-      : pathParts || "";
-
-    const target = new URL(
-      `${CLOUDFLARE_ORIGIN}/${path}`
+    // 不再依赖 req.query.path
+    // 直接从真实请求 URL 取路径
+    const requestUrl = new URL(
+      req.url,
+      `https://${req.headers.host}`
     );
 
-    for (const [key, value] of Object.entries(req.query)) {
-      if (key === "path") continue;
+    // /api/quote -> quote
+    // /api/kline -> kline
+    const upstreamPath =
+      requestUrl.pathname.startsWith("/api/")
+        ? requestUrl.pathname.slice(5)
+        : "";
 
-      if (Array.isArray(value)) {
-        for (const v of value) {
-          target.searchParams.append(key, v);
-        }
-      } else if (value !== undefined) {
-        target.searchParams.set(key, value);
-      }
+    if (!upstreamPath) {
+      return res.status(400).json({
+        ok: false,
+        error: "Missing API path"
+      });
+    }
+
+    const target = new URL(
+      `${CLOUDFLARE_ORIGIN}/${upstreamPath}`
+    );
+
+    // 原样转发所有 query 参数
+    for (const [key, value] of requestUrl.searchParams.entries()) {
+      target.searchParams.append(key, value);
     }
 
     const response = await fetch(target.toString(), {
