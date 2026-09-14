@@ -56,3 +56,9 @@ Code verified: 41 tests. Production verified: NO, and deployment is explicitly o
 59/59 tests PASS. Added official QStash signature verification, POST watcher, GET events, atomic 200-event ring, deduplication, stale-quote freeze, stable SIGNAL_READY and post-emission no-chase observation. Six model detectors and legacy proxy unchanged. Simulated REST CAS, independent-client restart, PREPARE/ARMED/READY/MISSED/INVALIDATED/TP1/TP2, signed/unsigned/tampered/expired requests covered.
 
 User reports live Redis persistence already verified. This turn did not independently rerun that live acceptance. setup-qstash.js returns NOT_CONFIGURED (credentials and destination absent); no recurring delivery claim. See WATCHER.md for Preview-only setup and protection bypass. Production not deployed; no orders or profitability calculation.
+
+## Watcher live acceptance preparation
+
+Added approved Preview default destination and per-execution CAS revision receipts (unchanged input no longer suppresses watcher heartbeat writes). 61/61 local tests pass, including five simulated calls advancing versions 1–5 while recording one transition, plus default-destination signature verification.
+
+No remote QStash keys created or overwritten. User confirms existing Preview injection; independent presence verification and live five-delivery acceptance remain BLOCKED_BY_AUTHORIZATION. Local credential presence checks are false, .env.local and Vercel CLI auth/link files absent; attempted Vercel UI access timed out. No schedule creation or live state result is claimed.

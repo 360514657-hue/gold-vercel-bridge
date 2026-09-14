@@ -33,3 +33,11 @@ Transitions are observed per invocation; minute polling cannot reconstruct every
 59 local tests passed, including Redis REST/CAS simulation and a new independent adapter reading persisted state. This is simulated cold-start evidence, not a new live Vercel cold-start test. User reports existing live Redis passed. QStash schedule and live delivery are NOT_CONFIGURED in this development environment (no credentials/destination available). Latest live state UNKNOWN until an authorized Preview read is available.
 
 Sources: https://upstash.com/docs/qstash/features/schedules ; https://github.com/upstash/qstash-js ; https://upstash.com/docs/workflow/troubleshooting/vercel
+
+## Approved target and execution receipts
+
+The user-approved branch alias is now the default signed destination: https://gold-vercel-bridge-git-codex-xauusd-signal-engine-jay-4402.vercel.app/api/watch/xauusd. An empty WATCH_DESTINATION_URL uses that alias. No QStash key is generated, updated or rotated by any code here. The setup script refuses any other destination and requires the existing protection bypass secret.
+
+Each successful authenticated watcher execution performs a CAS write even for unchanged input, incrementing state_version and saving last_watch. Its response includes state_version/updated_at; events exposes the same plus last_watch. Only actual stage/signal changes append transitions. This separates delivery liveness from market changes. Simulated five-call receipts are not a substitute for five QStash deliveries.
+
+User reports the three QStash variables and bypass secret are already injected into Preview. Locally they are absent, no .env.local or Vercel authorization exists, and browser account access timed out. This is an access blocker, not evidence that the remote variables are missing. Authorize the existing Vercel account or securely pull its Preview variables locally; do not create replacement keys. Then run the setup script and retain five QStash delivery receipts, matching watcher response revisions, and current events output.

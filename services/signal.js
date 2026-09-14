@@ -16,7 +16,7 @@ export async function signal({repository=store(),loader=load,now=Date.now(),logg
     const key=createHash('sha256').update(JSON.stringify({serviceVersion:'watcher_v1',executionVersion,chaseLimit:chaseLimit(),quote:input.quote,m5:input.m5,m15:input.m15,macro:macro(input,before?.candidate),errors:input.source_errors})).digest('hex');
     // Different API views of the same market update must not consume each other's
     // signal. A stable signal_id lets clients deduplicate; this is not an order.
-    if(before?.last_input_hash===key&&before.latest_result&&input.now<=before.cache_until)return {...before.latest_result,time:new Date(input.now).toISOString()};
+    if(!requireDurable&&before?.last_input_hash===key&&before.latest_result&&input.now<=before.cache_until)return {...before.latest_result,time:new Date(input.now).toISOString()};
     const unavailable=!input.quote.fresh||input.quote.at<(before?.path?.at(-1)?.at??0);
     const {state,result}=unavailable?{state:structuredClone(before??freshState()),result:{time:new Date(input.now).toISOString(),price:input.quote.price,stage:'DEGRADED',action:'NO_TRADE',signal_id:before?.candidate?.id??null,model:before?.candidate?.model??null,reason:[!repository.durable?'DURABLE_STATE_REQUIRED':'QUOTE_NOT_FRESH'],data_quality:{quote_fresh:false,state_durable:repository.durable,flags:input.m5.flags,source_errors:input.source_errors},signal_only:true,order_executed:false,debug:{conditions:{quote_fresh:false}}}}:evaluate(input,before,{durable:repository.durable});
     // Preserve terminal invalidation for the poll that observes it, even after engine retirement.
@@ -24,6 +24,7 @@ export async function signal({repository=store(),loader=load,now=Date.now(),logg
       result.stage='INVALIDATED';result.signal_id=before.candidate.id;result.model=before.candidate.model;result.action='NO_TRADE';result.reason=[state.history.at(-1).reason];
     }
     state.revision=(before?.revision??0)+1;state.updated_at=new Date(input.now).toISOString();
+    if(requireDurable)state.last_watch={at:state.updated_at,state_version:state.revision,stage:result.stage,action:result.action};
  result.debug.persistence={state_version:state.revision,state_schema_version:state.version,updated_at:state.updated_at,current_stage:result.stage,current_model:result.model,retest_count:state.candidate?.retest_count??0,extreme:result.extreme??null,reclaim_level:result.reclaim_level??null,trigger_level:result.trigger_level??null};
  const transition=appendTransition(state,before,result,Math.round(performance.now()-started));
  if(result.action==='ALLOW_ORDER')state.latest_signal_time=result.time;
