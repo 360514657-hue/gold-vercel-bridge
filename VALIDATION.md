@@ -79,4 +79,8 @@ Real macro source validation NOT_COMPLETE: bridge root exposes /codes, but code 
 
 ## FINAL BUILD V1
 
-Supersedes prior TE live-integration and paper-study plans. Final runtime is DXY-only iTick + Jin10. 143 deterministic tests pass; no historical returns, win rates, optimization or performance claims. ACTIVE/alert/email tests use synthetic unit fixtures only. See FINAL_BUILD.md for rules, limits and deployment checks.
+Supersedes prior TE live-integration and paper-study plans. Final runtime is DXY-only iTick + Jin10. 143 deterministic tests pass; no historical returns, win rates, optimization or performance claims. ACTIVE/alert tests use synthetic unit fixtures only. See FINAL_BUILD.md for rules, limits and deployment checks.
+
+## Alert read contract revision
+
+Email implementation/configuration/health checks removed. 148/148 tests pass, covering eight-field alert responses, material-change deduplication, stable timestamps, ACTIVE entry immutability, legacy state cleanup, stale/future watcher fail-closed reads, and unchanged five-field execution contract. No historical backtest or live trading. ChatGPT reads the alert endpoint; no direct push into an existing conversation.

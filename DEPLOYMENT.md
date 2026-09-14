@@ -55,4 +55,4 @@ Configure TRADING_ECONOMICS_API_KEY with markets and intraday entitlement in Pre
 
 ## FINAL BUILD Preview
 
-ITICK_API_KEY is required in Preview (Free Trial host pinned). Optional email: ALERT_EMAIL_ENABLED=true, ALERT_EMAIL_TO, ALERT_EMAIL_FROM, RESEND_API_KEY; missing email does not stop watcher. Existing QStash schedule/signing/bypass settings retained. Latest alerts endpoint added; no ChatGPT push or broker execution. See FINAL_BUILD.md.
+ITICK_API_KEY is required in Preview (Free Trial host pinned). Existing QStash schedule/signing/bypass settings retained. Latest alerts endpoint returns the exact eight-field read contract; no ChatGPT push or broker execution. See FINAL_BUILD.md.

@@ -16,14 +16,16 @@ First valid contract records immutable id/side/entry/initial SL/TP/activation ti
 
 New favorable pivot uses a strict three-bar swing, all bars complete, pivot occurs after activation, new confirmation time, BUY higher than prior low / SELL lower than prior high. Current ATR buffer supplies proposed stop; only more protective stop on the safe side of current quote can replace it. At >=1 initial R, with that same new pivot confirmation, protect at least break-even. Without pivot, 1R alone changes nothing. ENTRY stays fixed. TP never extends after activation: loss of aligned macro or a new opposing shift may select the nearest already-known level ahead of current quote and closer than current TP. Data/event failures suppress outward contract to NONE, preserving ACTIVE management state until observable closure. No new opposite signal that poll.
 
-## Alerts and email
+## Alert read contract
 
-GET /api/alerts/xauusd/latest reads the persisted exact five-field contract and deterministic Chinese template. Stale watcher >120s returns NONE, not an old actionable message. A macro-only change without price/side change updates visible context but does not send a duplicate. New side, cancellation, SL or TP changes create one CAS outbox record; last_alert_contract_hash is persisted. Outbox is committed with signal state before sending. Resend uses the same alert id as Idempotency-Key, a CAS lease, max three attempts and no automated retry beyond 23h (provider key retention is 24h). Email failures do not fail the watcher. Accepted API send is SENT, not proof of inbox delivery.
+GET /api/alerts/xauusd/latest is the sole ChatGPT message source. It returns exactly macro, side, entry, stop_loss, take_profit, human_message, updated_at (ISO), signal_id. Message rendering is a fixed Chinese template with two decimal prices. GPT cannot decide or modify direction, prices, score or structure.
 
-Server-only Preview env: ALERT_EMAIL_ENABLED=true, ALERT_EMAIL_TO, ALERT_EMAIL_FROM (verified sending domain), RESEND_API_KEY. Missing setup => NOT_CONFIGURED. Body contains only the five-line signal or two-line no-trade template. No ChatGPT proactive push is claimed; ChatGPT reads the alert endpoint. No email credentials or addresses are exposed in health/debug.
+The watcher persists latest_alert, latest_alert_contract_hash and alert_updated_at in the same Redis CAS as execution. Hash covers material side/entry/SL/TP fields: macro-only changes without an effect on permission do not replace the alert, message or update time. A permission change that cancels/permits a trade changes side and generates one new alert. ACTIVE entry is immutable. Initial NONE is stored once; identical snapshots never refresh alert time. Old nested alerts migrate once and retired notification state is removed without sending anything.
+
+Stale/missing/future watcher time (>120s), malformed state or store failure returns HTTP 503 and the same eight-field shape with NONE/null prices. The last known alert timestamp is preserved when available; before any alert it is the Unix epoch, not an invented live update. Reading does not write Redis. Only fresh responses are usable machine messages.
+
+There is no email provider, dispatch, configuration, health check or outbox. External Vercel does not directly push events into an existing ChatGPT conversation. ChatGPT reads /api/alerts/xauusd/latest; no proactive ChatGPT push is claimed.
 
 ## Deployment and verification
 
-Use existing codex/xauusd-signal-engine Git push Preview flow and existing QStash schedule/signatures/protection bypass. Set ITICK_API_KEY in Preview; free host is fixed regardless of external env. Do not merge main, promote Production, change QStash keys or create duplicate schedules. Existing four proxy interfaces are unchanged.
-
-Verify health, execution, debug, latest alert and events. Confirm three distinct last_watch timestamps with increasing versions; ordinary GET-induced revisions do not prove QStash delivery. Configured email can be ready without sending a fabricated signal. Real market may remain NONE indefinitely when any gate fails; no forced signal for demonstration.
+Existing development-branch Git push deploys Preview only. Existing QStash minute schedule, signatures and bypass remain unchanged. No main merge, Production promotion or broker orders. Health checks jin10_ok, xau_quote_fresh, itick_ok, dxy_fresh, redis_ok, state_storage_ok, watcher_recent, latest_alert_time. No performance backtest is run.

@@ -2,7 +2,6 @@ import {macroFilter} from '../engine/macroFilter.js';
 import {manageActive} from '../engine/active.js';
 import {structureAudit} from '../engine/structure-audit.js';
 import {updateAlert} from '../notifications/alerts.js';
-import {flushEmail,emailConfiguration} from '../notifications/email.js';
 import {executionDecision,persistExecution} from '../engine/execution.js';
 import {appendTransition} from './transitions.js';
 import {freshState} from '../engine/stateMachine.js';
@@ -19,7 +18,7 @@ export async function signal({repository=store(),loader=load,now=Date.now(),logg
   const input=await loader({now});
   for(let i=0;i<3;i++){
     const raw=await repository.read(),before=raw?JSON.parse(raw):null;
-    const key=createHash('sha256').update(JSON.stringify({serviceVersion:'final_build_v1',dxy:input.dxy,macro_facts:input.macro_facts,executionVersion,chaseLimit:chaseLimit(),quote:input.quote,m5:input.m5,m15:input.m15,macro:macro(input,before?.candidate),errors:input.source_errors})).digest('hex');
+    const key=createHash('sha256').update(JSON.stringify({serviceVersion:'alerts_read_v2',dxy:input.dxy,macro_facts:input.macro_facts,executionVersion,chaseLimit:chaseLimit(),quote:input.quote,m5:input.m5,m15:input.m15,macro:macro(input,before?.candidate),errors:input.source_errors})).digest('hex');
     // Different API views of the same market update must not consume each other's
     // signal. A stable signal_id lets clients deduplicate; this is not an order.
     if(!requireDurable&&before?.last_input_hash===key&&before.latest_result&&input.now<=before.cache_until)return {...before.latest_result,time:new Date(input.now).toISOString()};
@@ -48,7 +47,7 @@ export async function signal({repository=store(),loader=load,now=Date.now(),logg
  const transition=appendTransition(state,before,result,Math.round(performance.now()-started));
  if(result.execution.side!=='NONE')state.latest_signal_time=result.time;
  state.last_input_hash=key;state.latest_result=result;state.cache_until=Math.min(input.quote.at+policy.quoteMaxAgeMs,state.candidate?.expires_at??Infinity);
-    if(await repository.compareAndSet(raw,JSON.stringify(state))){if(transition){try{logger(transition);}catch{}}if(requireDurable){const email=await flushEmail(repository);result.email_status=emailConfiguration().configured?email:'NOT_CONFIGURED';}return result;}
+    if(await repository.compareAndSet(raw,JSON.stringify(state))){if(transition){try{logger(transition);}catch{}}return result;}
   }
   throw Error('STATE_CONFLICT_RETRY_LATER');
 }
