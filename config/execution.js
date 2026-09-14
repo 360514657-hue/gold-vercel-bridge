@@ -1,0 +1,2 @@
+// Engineering parameters, not optimized strategy parameters.
+export const executionPolicy=Object.freeze({version:'machine_execution_contract_v1',macroThreshold:40,weights:{DXY:30,US2Y:25,US10Y:20,REAL_YIELD:5,FED_EXPECTATIONS:10,ECONOMIC_SURPRISE:8,RISK_EVENT:2},critical:['DXY','US2Y','US10Y'],macroMaxAgeMs:900000,atrPeriods:5,atrFactor:.15,minBuffer:.05,maxBuffer:.50,maxRisk:5,minRR:2,maxChase:2,eventWindowMs:900000});

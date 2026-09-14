@@ -62,3 +62,9 @@ User reports live Redis persistence already verified. This turn did not independ
 Added approved Preview default destination and per-execution CAS revision receipts (unchanged input no longer suppresses watcher heartbeat writes). 61/61 local tests pass, including five simulated calls advancing versions 1–5 while recording one transition, plus default-destination signature verification.
 
 No remote QStash keys created or overwritten. User confirms existing Preview injection; independent presence verification and live five-delivery acceptance remain BLOCKED_BY_AUTHORIZATION. Local credential presence checks are false, .env.local and Vercel CLI auth/link files absent; attempted Vercel UI access timed out. No schedule creation or live state result is claimed.
+
+## Machine Execution Contract V1
+
+92/92 local tests PASS (existing 61 plus 31 execution tests); git diff --check required before commit. Added five-field execution endpoint, deterministic numerical macro gates, fixed structure-derived entry, dynamic ATR buffer, nearest-target RR constraint, macro permission/failure/resonance and atomic execution event deduplication. See MACHINE_EXECUTION_CONTRACT.md for exact definitions.
+
+Real macro source validation NOT_COMPLETE: bridge root exposes /codes, but code discovery and FRED CSV probes timed out. No guessed symbols or synthetic macro input entered live logic. Independent FRED daily diagnostic adapter exists, remains ineligible for intraday execution and disabled by default. Critical live macro absence forces NONE. QStash schedule and injected keys unchanged; no claim of newly verified minute delivery. No Production deployment, orders or profitability statistics.

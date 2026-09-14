@@ -83,3 +83,5 @@ MACRO_CONFIRMATION / FAILURE 的方向证据必须早于该价格事件，宏观
 Deployment stage status and configuration: see [DEPLOYMENT.md](DEPLOYMENT.md). New read-only health route: GET /api/health/signal. No production acceptance is claimed.
 
 Preview watcher and QStash configuration: [WATCHER.md](WATCHER.md).
+
+Strict five-field execution API and current macro data limitations: [MACHINE_EXECUTION_CONTRACT.md](MACHINE_EXECUTION_CONTRACT.md).
