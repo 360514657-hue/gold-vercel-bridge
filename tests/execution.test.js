@@ -5,7 +5,7 @@ function fixture(direction='BUY',bias='BULLISH'){
  const sell=direction==='SELL',facts=Object.fromEntries(['DXY','US2Y','US10Y'].map(k=>[k,{provider:'TEST_ONLY',verified:true,execution_eligible:true,value:100,reference_5m:bias==='BULLISH'?101:bias==='BEARISH'?99:100,reference_15m:bias==='BULLISH'?102:bias==='BEARISH'?98:100,at:now-1,reference_5m_at:now-1-300000,reference_15m_at:now-1-900000,available_at:now-1}]));
  const bars=Array.from({length:6},(_,i)=>({at:base+i*M,end:base+(i+1)*M,open:100,high:101,low:99,close:100}));
  const c={id:'fixture',direction,model:sell?'V2':'V1',stage:'SIGNAL_READY',shift_at:now-M,liquidity:sell?105:95,retest_count:1,retest:{at:now-1,low:98,high:102,close:100},evidence:[{event:sell?'SWEEP_HIGH':'SWEEP_LOW',at:now-2*M},{event:'RECLAIM',at:now-2*M}],expires_at:now+M};
- return {input:{now,quote:{price:100,fresh:true},macro_facts:facts,m5:{valid:bars},calendar:{ok:true}},state:{candidate:c},result:{stage:'SIGNAL_READY',market_state:'BALANCE',macro:{event_risk:false},data_quality:{quote_fresh:true,state_durable:true,confirmation_fresh:true},key_levels:(sell?[94,91]:[106,109]).map(price=>({price,available_at:base}))}};
+ return {input:{now,dxy:{provider:'ITICK',valid:true,fresh:true,timestamp:new Date(now-1).toISOString(),at:now-1,available_at:now-1,move_5m_pct:bias==='BULLISH'?-.1:bias==='BEARISH'?.1:0,move_15m_pct:bias==='BULLISH'?-.2:bias==='BEARISH'?.2:0},quote:{at:now,price:100,fresh:true},macro_facts:facts,m5:{valid:bars,quality:'GOOD'},m15:{quality:'GOOD'},calendar:{ok:true,data:[]}},state:{candidate:c},result:{stage:'SIGNAL_READY',market_state:'BALANCE',macro:{event_risk:false},data_quality:{quote_fresh:true,state_durable:true,confirmation_fresh:true},key_levels:(sell?[94,91]:[106,109]).map(price=>({price,available_at:base}))}};
 }
 const decide=f=>executionDecision(f.input,f.state,f.result);
 for(const [d,b] of [['SELL','BEARISH'],['BUY','BULLISH']])test(b+' aligned complete first retest permits '+d,()=>assert.equal(decide(fixture(d,b)).contract.side,d));
@@ -14,18 +14,18 @@ for(const [d,b] of [['BUY','BEARISH'],['SELL','BULLISH']]){
  test(b+' confirmed opposing reversal permits '+d+' with macro failure',()=>{const x=decide(fixture(d,b));assert.equal(x.contract.side,d);assert.equal(x.debug.macro_failure,true);});
 }
 const rejects={
- 'neutral incomplete structure':f=>{f.input.macro_facts=fixture('BUY','NEUTRAL').input.macro_facts;f.state.candidate.shift_at=null;},
+ 'neutral incomplete structure':f=>{f.input.dxy=fixture('BUY','NEUTRAL').input.dxy;f.state.candidate.shift_at=null;},
  'structural stop above 5':f=>{f.state.candidate.retest.low=94;},
  'nearest target below 2R':f=>{f.result.key_levels.unshift({price:101,available_at:base});},
  'no observed target':f=>{f.result.key_levels=[];},
  'future target':f=>{f.result.key_levels.forEach(l=>l.available_at=now+M);},
- 'high impact event window':f=>{f.result.macro.event_risk=true;},
+ 'high impact event window':f=>{f.input.calendar.data=[{title:'美国 CPI',star:3,pub_time:now}];},
  'unknown calendar':f=>{f.input.calendar.ok=false;},
  'second retest':f=>{f.state.candidate.retest_count=2;},
  'third retest':f=>{f.state.candidate.retest_count=3;},
  'stale quote':f=>{f.input.quote.fresh=false;},
- 'missing critical DXY':f=>{delete f.input.macro_facts.DXY;},
- 'unverified macro':f=>{f.input.macro_facts.DXY.verified=false;},
+ 'missing critical DXY':f=>{delete f.input.dxy;},
+ 'unverified macro':f=>{f.input.dxy.valid=false;},
  'incomplete volatility window':f=>{f.input.m5.valid.pop();},
  'gapped volatility bars':f=>{f.input.m5.valid[2].at+=1;},
  'non durable state':f=>{f.result.data_quality.state_durable=false;},

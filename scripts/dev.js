@@ -1,3 +1,4 @@
+import alerts from '../api/alerts/xauusd/latest.js';
 import macroMarket from '../api/debug/macro-market.js';
 import codes from '../api/debug/jin10-codes.js';
 import macroDiscovery from '../api/debug/jin10-macro.js';
@@ -10,7 +11,7 @@ import proxy from '../api/[...path].js';
 import {endpoint} from '../services/http.js';
 const routes=Object.fromEntries(['signal','scanner','debug'].map(v=>[`/api/${v}/xauusd`,endpoint(v)]));
 routes['/api/debug/jin10-codes']=codes;routes['/api/debug/jin10-macro']=macroDiscovery;routes['/api/health/signal']=health;routes['/api/execution/xauusd']=execution;
-routes['/api/debug/macro-market']=macroMarket;routes['/api/watch/xauusd']=watch;routes['/api/events/xauusd']=events;
+routes['/api/debug/macro-market']=macroMarket;routes['/api/alerts/xauusd/latest']=alerts;routes['/api/watch/xauusd']=watch;routes['/api/events/xauusd']=events;
 createServer(async(req,res)=>{
   res.status=n=>(res.statusCode=n,res);res.json=x=>{res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(x));};res.send=x=>res.end(x);
   await (routes[new URL(req.url,'http://localhost').pathname]??proxy)(req,res);

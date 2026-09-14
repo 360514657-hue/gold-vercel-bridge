@@ -76,3 +76,7 @@ Real macro source validation NOT_COMPLETE: bridge root exposes /codes, but code 
 ## Trading Economics multi-horizon adapter
 
 117/117 tests PASS, including synthetic provider discovery/identity, live-vs-delayed/freshness, gap/duplicate/future-bar rejection, header-only credentials, change/bp arithmetic, deterministic weighted confirmation and structure-only prices. Real TE acceptance is NOT_VALIDATED: local credential absent; no actual symbols/quotes/histories claimed. Missing critical data forces NEUTRAL/NONE. See TRADING_ECONOMICS.md. Original four-interface proxy unchanged. No orders, backtest, optimization or Production deployment.
+
+## FINAL BUILD V1
+
+Supersedes prior TE live-integration and paper-study plans. Final runtime is DXY-only iTick + Jin10. 143 deterministic tests pass; no historical returns, win rates, optimization or performance claims. ACTIVE/alert/email tests use synthetic unit fixtures only. See FINAL_BUILD.md for rules, limits and deployment checks.

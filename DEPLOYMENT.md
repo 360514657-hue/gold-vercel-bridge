@@ -52,3 +52,7 @@ References: https://upstash.com/docs/redis/features/restapi ; https://vercel.com
 ## Trading Economics Preview addition
 
 Configure TRADING_ECONOMICS_API_KEY with markets and intraday entitlement in Preview only (never Git/chat). See TRADING_ECONOMICS.md for discovery validation command and remaining live acceptance. No hardcoded symbols or FRED substitution. New /api/debug/macro-market is read-only and uses existing Preview protection; missing data returns null/fresh=false. Existing QStash signing/bypass variables and schedule remain unchanged. Git push to codex/xauusd-signal-engine requests Preview only; never promote or merge main.
+
+## FINAL BUILD Preview
+
+ITICK_API_KEY is required in Preview (Free Trial host pinned). Optional email: ALERT_EMAIL_ENABLED=true, ALERT_EMAIL_TO, ALERT_EMAIL_FROM, RESEND_API_KEY; missing email does not stop watcher. Existing QStash schedule/signing/bypass settings retained. Latest alerts endpoint added; no ChatGPT push or broker execution. See FINAL_BUILD.md.

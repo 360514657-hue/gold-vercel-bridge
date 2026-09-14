@@ -1,0 +1,12 @@
+export function emailConfiguration(env=process.env){const missing=['ALERT_EMAIL_TO','ALERT_EMAIL_FROM','RESEND_API_KEY'].filter(k=>!env[k]);if(env.ALERT_EMAIL_ENABLED!=='true')missing.unshift('ALERT_EMAIL_ENABLED=true');return {configured:missing.length===0,missing};}
+export function emailProvider({env=process.env,fetcher=fetch}={}){return {configuration:emailConfiguration(env),async send(alert){if(!emailConfiguration(env).configured)return 'NOT_CONFIGURED';try{const c=alert.contract,subject=c.side==='NONE'?'[XAUUSD] 交易取消':'[XAUUSD] '+(c.side==='BUY'?'多':'空')+' '+c.entry.toFixed(2);const r=await fetcher('https://api.resend.com/emails',{method:'POST',headers:{Authorization:'Bearer '+env.RESEND_API_KEY,'Content-Type':'application/json','Idempotency-Key':'xauusd-'+alert.id},body:JSON.stringify({from:env.ALERT_EMAIL_FROM,to:[env.ALERT_EMAIL_TO],subject,text:alert.human_message}),redirect:'error',signal:AbortSignal.timeout(8000)});return r.ok?'SENT':'FAILED';}catch{return 'FAILED';}}};}
+// CAS lease plus provider idempotency prevents concurrent duplicate sends. Stop ambiguous retries before 24h key expiry.
+export async function flushEmail(repo,{provider=emailProvider(),now=Date.now()}={}){
+ try{let item;
+ for(let i=0;i<3;i++){const raw=await repo.read();if(!raw)return 'NO_ALERT';const state=JSON.parse(raw);item=(state.email_outbox??[]).find(x=>(['PENDING','FAILED'].includes(x.status)||x.status==='SENDING'&&x.lease_until<=now)&&x.attempts<3);if(!item)return state.latest_alert?.email_status??'NO_ALERT';
+ if(!provider.configuration.configured||now-item.created_at>23*3600000){item.status=provider.configuration.configured?'EXPIRED':'NOT_CONFIGURED';if(state.latest_alert?.id===item.id)state.latest_alert.email_status=item.status;if(await repo.compareAndSet(raw,JSON.stringify(state)))return item.status;continue;}
+ item.status='SENDING';item.lease_until=now+120000;item.attempts++;if(await repo.compareAndSet(raw,JSON.stringify(state)))break;item=null;}
+ if(!item||item.status!=='SENDING')return 'DEFERRED';const status=await provider.send(item);
+ for(let i=0;i<3;i++){const raw=await repo.read(),state=JSON.parse(raw),stored=state.email_outbox?.find(x=>x.id===item.id);if(!stored)return status;stored.status=status;if(state.latest_alert?.id===item.id)state.latest_alert.email_status=status;state.email_outbox=state.email_outbox.filter(x=>['PENDING','SENDING','FAILED'].includes(x.status)||x.id===state.latest_alert?.id);if(await repo.compareAndSet(raw,JSON.stringify(state)))return status;}return 'ACK_PENDING';
+ }catch{return 'FAILED';}
+}

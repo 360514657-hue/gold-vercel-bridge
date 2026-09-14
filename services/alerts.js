@@ -1,0 +1,5 @@
+import {store} from '../state/store.js';import {humanMessage} from '../notifications/alerts.js';import {noExecution} from '../engine/execution.js';import {emailConfiguration} from '../notifications/email.js';
+export function alertsHandler({repository,now=()=>Date.now()}={}){return async(req,res)=>{res.setHeader('Cache-Control','no-store');if(req.method!=='GET')return res.status(405).json({error:'METHOD_NOT_ALLOWED'});try{const repo=repository??store();if(!repo.durable)throw Error();const raw=await repo.read(),state=raw?JSON.parse(raw):null,alert=state?.latest_alert;const stale=!state?.last_watch||now()-Date.parse(state.last_watch.at)>120000;
+ if(!alert||stale)return res.status(200).json({contract:noExecution(),human_message:humanMessage(noExecution()),status:stale?'WATCHER_STALE':'NO_ALERT',email_status:emailConfiguration().configured?'NO_ALERT':'NOT_CONFIGURED'});
+ return res.status(200).json({...alert,email_status:emailConfiguration().configured?alert.email_status:'NOT_CONFIGURED'});
+ }catch{return res.status(503).json({contract:noExecution(),human_message:humanMessage(noExecution()),error:'ALERT_STORE_UNAVAILABLE'});}};}

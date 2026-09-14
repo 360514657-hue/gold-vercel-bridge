@@ -14,6 +14,6 @@ export function rating({candidate,plan,quality,macro,rangePosition,marketState,d
   if(!plan.ok)reasons.push(plan.reason);
   if(reasons.length)return {rating:plan.ok?'B':'C',action:plan.ok&&!reasons.includes('QUOTE_NOT_FRESH')?'OBSERVE':'NO_TRADE',confidence:25,reasons};
   if(candidate.retest_count>1)return {rating:'B',action:'OBSERVE',confidence:50,reasons:['SECOND_RETEST_DOWNGRADED']};
-  const top=plan.rr1>=2.5&&macro.relation!=='NONE'&&macro.status==='AVAILABLE'&&quality.m5_quality==='GOOD'&&quality.m15_quality==='GOOD';
+  const top=plan.rr1>=2.5&&quality.m5_quality==='GOOD'&&quality.m15_quality==='GOOD';
   return {rating:top?'A+':'A',action:'ALLOW_ORDER',confidence:top?85:quality.m5_quality==='GOOD'&&quality.m15_quality==='GOOD'?75:60,reasons:['COMPLETE_STRUCTURE_FIRST_RETEST_RISK_PASS']};
 }
