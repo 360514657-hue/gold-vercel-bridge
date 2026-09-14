@@ -72,3 +72,7 @@ Real macro source validation NOT_COMPLETE: bridge root exposes /codes, but code 
 ## Jin10 resource discovery only
 
 100/100 tests PASS; added standard Streamable HTTP resources/read adapter and read-only /api/debug/jin10-codes plus /api/debug/jin10-macro. Existing generic proxy unchanged. No Worker source or wrangler configuration found in tracked branch/history; full inventory in JIN10_RESOURCE_DISCOVERY.md. Direct official MCP initialize returned 401 without credentials; bridge /codes and /tools timed out. No actual internal code, live quote or bars success is claimed. No third-party feed used and no Macro V2 integration performed. Original untracked package-lock.json remains outside this commit.
+
+## Trading Economics multi-horizon adapter
+
+117/117 tests PASS, including synthetic provider discovery/identity, live-vs-delayed/freshness, gap/duplicate/future-bar rejection, header-only credentials, change/bp arithmetic, deterministic weighted confirmation and structure-only prices. Real TE acceptance is NOT_VALIDATED: local credential absent; no actual symbols/quotes/histories claimed. Missing critical data forces NEUTRAL/NONE. See TRADING_ECONOMICS.md. Original four-interface proxy unchanged. No orders, backtest, optimization or Production deployment.

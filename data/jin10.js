@@ -1,4 +1,4 @@
-import {loadFredDaily} from './providers/fred.js';
+import {loadTradingEconomics} from './providers/trading-economics.js';
 import {ms,policy} from '../config/policy.js';
 export const ORIGIN='https://gold.360514657.workers.dev';
 export function number(x){return x===null || x===undefined || x==='' ? null : Number.isFinite(Number(x))?Number(x):null;}
@@ -35,8 +35,9 @@ export function bars(raw,tf,now){
 }
 export async function load({fetcher=fetch,now=Date.now(),origin=ORIGIN}={}){
   const paths={quote:'/quote?code=XAUUSD',m5:'/bars?code=XAUUSD&tf=M5&count=30',m15:'/bars?code=XAUUSD&tf=M15&count=20',calendar:'/calendar',gold:'/flash?keyword=%E9%BB%84%E9%87%91',fed:'/flash?keyword=%E7%BE%8E%E8%81%94%E5%82%A8'};
+  const macroPending=loadTradingEconomics({fetcher,now});
   const values=await Promise.all(Object.entries(paths).map(async([k,p])=>{try{const r=await fetcher(origin+p,{headers:{Accept:'application/json'},signal:AbortSignal.timeout(8000)});if(!r.ok)throw Error();return [k,await r.json()];}catch{return [k,null];}}));
   const raw=Object.fromEntries(values);
-  const macro_facts=process.env.FRED_CONTEXT_ENABLED==='true'?await loadFredDaily({fetcher,now}):{};
-  return {now,macro_facts,quote:quote(raw.quote,now),m5:bars(raw.m5,'M5',now),m15:bars(raw.m15,'M15',now),calendar:raw.calendar,flashes:[raw.gold,raw.fed],source_errors:values.filter(([,v])=>!v).map(([k])=>k)};
+  const macro_market=await macroPending,macro_facts=macro_market.facts;
+  return {now,macro_facts,macro_market,quote:quote(raw.quote,now),m5:bars(raw.m5,'M5',now),m15:bars(raw.m15,'M15',now),calendar:raw.calendar,flashes:[raw.gold,raw.fed],source_errors:values.filter(([,v])=>!v).map(([k])=>k)};
 }

@@ -48,3 +48,7 @@ Upstash Console: open/create the Redis database intended for this project; Conne
 Vercel: open the existing gold-vercel-bridge project; confirm Git repository and that codex/xauusd-signal-engine is NOT the Production Branch. Settings > Environment Variables: add the two values for Preview only; optionally bind to this development branch. Add MAX_CHASE_DISTANCE_USD=2.0 if desired. Changed variables require a new Preview deployment. Current edits are still local/uncommitted: an existing remote deployment will not include them. After committing/pushing this development branch, use its Preview deployment; do not merge to Production or click Promote to Production. Alternatively authorize CLI with vercel login and vercel link in this repository for a later Preview-only deployment.
 
 References: https://upstash.com/docs/redis/features/restapi ; https://vercel.com/docs/environment-variables ; https://vercel.com/docs/git
+
+## Trading Economics Preview addition
+
+Configure TRADING_ECONOMICS_API_KEY with markets and intraday entitlement in Preview only (never Git/chat). See TRADING_ECONOMICS.md for discovery validation command and remaining live acceptance. No hardcoded symbols or FRED substitution. New /api/debug/macro-market is read-only and uses existing Preview protection; missing data returns null/fresh=false. Existing QStash signing/bypass variables and schedule remain unchanged. Git push to codex/xauusd-signal-engine requests Preview only; never promote or merge main.

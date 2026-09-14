@@ -21,7 +21,7 @@ export function executionDecision(input,state,result){
  const failure=!!(mac.acceptable&&opposite&&reversal&&Number.isFinite(c?.liquidity));
  const permission=mac.bias==='NEUTRAL'?reversal:aligned||failure;
  const trend=long?result.market_state==='TREND_UP':result.market_state==='TREND_DOWN';
- const resonance=opposite&&!failure?'CONFLICT':aligned&&trend&&structure.first_retest&&result.data_quality?.confirmation_fresh&&mac.acceptable?'STRONG':permission?'NORMAL':'NONE';
+ const resonance=opposite&&!failure?'CONFLICT':aligned&&trend&&structure.first_retest&&result.data_quality?.confirmation_fresh&&mac.acceptable&&mac.strong?'STRONG':permission?'NORMAL':'NONE';
  const entry=Number.isFinite(c?.retest?.close)?cents(c.retest.close):null,v=volatility(input.m5.valid,c?.retest?.at??-1);
  const extreme=long?c?.retest?.low:c?.retest?.high;
  // Round away from structure, never towards it to shrink risk.
@@ -33,7 +33,7 @@ export function executionDecision(input,state,result){
  const selected=resonance==='STRONG'&&rr1>=p.minRR&&rr2>=p.minRR?t2:t1;
  const booleans={quote_fresh:input.quote.fresh===true&&result.data_quality?.quote_fresh===true,durable_state:result.data_quality?.state_durable===true,macro_quality_acceptable:mac.acceptable,no_high_impact_event_window:input.calendar?.ok===true&&result.macro?.event_risk===false,valid_direction_permission:!!permission,valid_structure:!!validStructure,first_retest:structure.first_retest,unique_entry_valid:entry!==null&&entry>0&&Number.isFinite(input.quote.price),structural_stop_valid:!!v&&risk>0,risk_within_5:risk>0&&risk<=p.maxRisk,liquidity_target_exists:t1!==null,rr_valid:rr1!==null&&rr1>=p.minRR,not_missed:!c?.timing_missed&&result.stage!=='MISSED'&&entry!==null&&Math.abs(input.quote.price-entry)<=p.maxChase,live_price_not_invalidated:sl!==null&&t1!==null&&sign*(input.quote.price-sl)>0&&sign*(t1-input.quote.price)>0,not_duplicate:!state.execution_closed_ids?.includes(c?.id),setup_live:!!c&&['SIGNAL_READY','ACTIVE'].includes(c.stage)&&(!c.expires_at||input.now<=c.expires_at)&&!c.historical_retest,confirmation_fresh:result.data_quality?.confirmation_fresh===true,structure_not_invalidated:!c?.invalidation_reason};
  const contract=Object.values(booleans).every(Boolean)?{macro:mac.bias,side:long?'BUY':'SELL',entry,stop_loss:sl,take_profit:selected}:noExecution(mac.bias);
- return {contract,debug:{version:p.version,macro_score:mac.score,macro_components:mac.components,macro_quality:mac.quality,macro_failure:failure,resonance,structure,entry_basis:'CONFIRMED_FIRST_RETEST_BAR_CLOSE',stop_basis:'CONFIRMED_RETEST_EXTREME_PLUS_CLAMPED_ATR_BUFFER',volatility_buffer:v?.buffer??null,volatility_method:v?.method??'UNAVAILABLE',target1:t1,target2:t2,selected_target:selected,rr: selected===t2?rr2:rr1,rr1,rr2,risk_usd:risk,booleans}};
+ return {contract,debug:{version:p.version,macro_score:mac.score,macro_method:mac.method,macro_strong:mac.strong,macro_components:mac.components,macro_quality:mac.quality,macro_failure:failure,resonance,structure,entry_basis:'CONFIRMED_FIRST_RETEST_BAR_CLOSE',stop_basis:'CONFIRMED_RETEST_EXTREME_PLUS_CLAMPED_ATR_BUFFER',volatility_buffer:v?.buffer??null,volatility_method:v?.method??'UNAVAILABLE',target1:t1,target2:t2,selected_target:selected,rr: selected===t2?rr2:rr1,rr1,rr2,risk_usd:risk,booleans}};
 }
 export function persistExecution(state,before,decision,now){
  const prior=before?.execution_contract??noExecution(),next=decision.contract;
