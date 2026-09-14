@@ -50,3 +50,9 @@ All tests rerun: 41/41 PASS (37 existing plus four focused retest tests). Covera
 Case B RULE_CONFLICT_RESOLVED_IN_CODE: synthetic confirming entry 4332, structural SL 4328.01, risk 3.99, TP1 4340, TP2 4347, RR1 about 2.005, A / ALLOW_ORDER with otherwise valid gates. No live market path, exact requested entry interval, or profitability is claimed validated. Real timestamped market acceptance remains NOT_VALIDATED.
 
 Code verified: 41 tests. Production verified: NO, and deployment is explicitly on hold. Redis live validation: NOT_RUN, credentials still required. Signal logic verified: synthetic fixtures only. Profitability NOT verified. Original four-interface proxy source unchanged.
+
+## Watcher continuation
+
+59/59 tests PASS. Added official QStash signature verification, POST watcher, GET events, atomic 200-event ring, deduplication, stale-quote freeze, stable SIGNAL_READY and post-emission no-chase observation. Six model detectors and legacy proxy unchanged. Simulated REST CAS, independent-client restart, PREPARE/ARMED/READY/MISSED/INVALIDATED/TP1/TP2, signed/unsigned/tampered/expired requests covered.
+
+User reports live Redis persistence already verified. This turn did not independently rerun that live acceptance. setup-qstash.js returns NOT_CONFIGURED (credentials and destination absent); no recurring delivery claim. See WATCHER.md for Preview-only setup and protection bypass. Production not deployed; no orders or profitability calculation.

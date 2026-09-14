@@ -81,3 +81,5 @@ MACRO_CONFIRMATION / FAILURE 的方向证据必须早于该价格事件，宏观
 `node scripts/smoke.js` 为单次只读线上连通测试，观察模式不发信号。若本机Node直连网络受限，可用 `scripts/smoke-windows.ps1` 通过Windows HTTPS传输验证实际schema；这不能代替Vercel部署环境的连通验收。尚未验证生产部署、真实Redis、真实交易执行或盈利能力。
 
 Deployment stage status and configuration: see [DEPLOYMENT.md](DEPLOYMENT.md). New read-only health route: GET /api/health/signal. No production acceptance is claimed.
+
+Preview watcher and QStash configuration: [WATCHER.md](WATCHER.md).
