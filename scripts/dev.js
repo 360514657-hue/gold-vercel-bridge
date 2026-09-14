@@ -1,3 +1,5 @@
+import codes from '../api/debug/jin10-codes.js';
+import macroDiscovery from '../api/debug/jin10-macro.js';
 import execution from '../api/execution/xauusd.js';
 import watch from '../api/watch/xauusd.js';
 import events from '../api/events/xauusd.js';
@@ -6,7 +8,7 @@ import {createServer} from 'node:http';
 import proxy from '../api/[...path].js';
 import {endpoint} from '../services/http.js';
 const routes=Object.fromEntries(['signal','scanner','debug'].map(v=>[`/api/${v}/xauusd`,endpoint(v)]));
-routes['/api/health/signal']=health;routes['/api/execution/xauusd']=execution;
+routes['/api/debug/jin10-codes']=codes;routes['/api/debug/jin10-macro']=macroDiscovery;routes['/api/health/signal']=health;routes['/api/execution/xauusd']=execution;
 routes['/api/watch/xauusd']=watch;routes['/api/events/xauusd']=events;
 createServer(async(req,res)=>{
   res.status=n=>(res.statusCode=n,res);res.json=x=>{res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(x));};res.send=x=>res.end(x);
