@@ -18,9 +18,15 @@ export class RedisStore {
   read(){return this.command(['GET',this.key]);}
   async compareAndSet(before,after){return await this.command(['EVAL',CAS,'1',this.key,before??'',after])===1;}
 }
-let singleton;
-export function store(){
-  if(!singleton){const url=process.env.UPSTASH_REDIS_REST_URL,token=process.env.UPSTASH_REDIS_REST_TOKEN;
-    if(!!url!==!!token)throw Error('INCOMPLETE_STATE_STORE_CONFIG');singleton=url?new RedisStore(url,token,{key:stateKey()}):new MemoryStore();}
-  return singleton;
+// Validate both pairs before selecting a source; never mix credentials across pairs.
+export function redisConfig(env){
+ const pairs=[{url:env.UPSTASH_REDIS_REST_URL,token:env.UPSTASH_REDIS_REST_TOKEN,source:'UPSTASH'},{url:env.KV_REST_API_URL,token:env.KV_REST_API_TOKEN,source:'VERCEL_KV'}];
+ for(const {url,token} of pairs)if(!!url!==!!token)throw Error('INCOMPLETE_STATE_STORE_CONFIG');
+ return pairs.find(({url,token})=>url&&token)??null;
 }
+export function createStore(env=process.env,options={}){
+ const config=redisConfig(env);
+ return config?new RedisStore(config.url,config.token,{...options,key:stateKey(env)}):new MemoryStore();
+}
+let singleton;
+export function store(){return singleton??=createStore();}
